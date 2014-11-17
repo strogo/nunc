@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/imdario/nunc"
 	"strings"
@@ -10,15 +9,22 @@ import (
 
 var (
 	// Command
-	get = cli.Command{
-		Name:      "get",
-		ShortName: "g",
-		Usage:     "get a task from context",
-		Action:    getCli,
+	done = cli.Command{
+		Name:      "done",
+		ShortName: "x",
+		Usage:     "mark a task as done",
+		Action:    doneCli,
+		Flags:     []cli.Flag{
+			closed,
+		},
+	}
+	// Done flags
+	closed = cli.BoolFlag{
+		Name: "close, c",
 	}
 )
 
-func getCli(c *cli.Context) {
+func doneCli(c *cli.Context) {
 	initFromCli(c)
 	defer nunc.Destroy()
 	id := c.Args().First()
@@ -34,16 +40,8 @@ func getCli(c *cli.Context) {
 	if err != nil {
 		panic(err)
 	}
-	task, err := nunc.Get(context, taskId, true)
-	if err != nil {
+	beClose := c.Bool("close")
+	if err := nunc.Done(context, taskId, beClose); err != nil {
 		panic(err)
-	}
-	fmt.Printf("[%s]\n\n%s\n\n", nunc.TaskID(context, task), task.Text)
-	body, err := nunc.TaskBody(context, task)
-	if err != nil {
-		panic(err)
-	}
-	if body != "" {
-		fmt.Println(body)
 	}
 }
