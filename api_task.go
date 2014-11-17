@@ -9,7 +9,7 @@ import (
 
 var (
 	getTask = ql.MustCompile("select * from Task where Context == $1 && id() == $2;")
-	listTasks = ql.MustCompile(fmt.Sprintf("select id(), Text, State from Task where Context == $1 && State > %d order by id();", Closed))
+	listTasks = ql.MustCompile(fmt.Sprintf("select id(), Text, State from Task where Context == $1 && State > %d order by id();", Resolved))
 	listAllTasks = ql.MustCompile("select id(), Text, State from Task where Context == $1 order by id();")
 	doneTask = ql.MustCompile("update Task set State = $1 where Context == $2 && id() == $3;")
 	addTask = ql.MustCompile("insert into Task values($1, $2, $3, $4, $5, $6);")
@@ -53,9 +53,9 @@ func ListTasks(context Context, all bool) (tasks []Task, err error) {
 func unmarshalStateFromInt(src int32) (state State) {
 	switch src {
 	case -1:
-		state = Resolved
-	case 0:
 		state = Closed
+	case 0:
+		state = Resolved
 	case 1:
 		state = Open
 	case 2:
