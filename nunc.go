@@ -1,9 +1,12 @@
 package nunc
 
 import (
+	"fmt"
 	"github.com/cznic/ql"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 type internalState struct {
@@ -14,6 +17,22 @@ type internalState struct {
 
 func ResolvePath(file string) (path string) {
 	return filepath.Join(is.Home, file)
+}
+
+func ResolveTaskID(id string) (context Context, taskId int64, err error) {
+	data := strings.SplitN(id, "-", 2)
+	if len(data) != 2 {
+		err = fmt.Errorf("invalid task id")
+	}
+	context, _, err = GetContext(data[0], true)
+	if err != nil {
+		return
+	}
+	taskId, err = strconv.ParseInt(data[1], 0, 64)
+	if err != nil {
+		return
+	}
+	return
 }
 
 var is internalState

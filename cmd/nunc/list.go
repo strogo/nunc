@@ -28,7 +28,7 @@ func listCli(c *cli.Context) {
 		panic(err)
 	}
 	beAll := c.Bool("all")
-	tasks, err := nunc.ListTasks(context, beAll)
+	tasks, err := nunc.List(context, beAll)
 	if err != nil {
 		panic(err)
 	}

@@ -8,11 +8,11 @@ import (
 )
 
 var (
-	getTask = ql.MustCompile("select * from Task where Context == $1 && id() == $2;")
-	listTasks = ql.MustCompile(fmt.Sprintf("select id(), Text, State from Task where Context == $1 && State > %d order by id();", Resolved))
+	getTask      = ql.MustCompile("select * from Task where Context == $1 && id() == $2;")
+	listTasks    = ql.MustCompile(fmt.Sprintf("select id(), Text, State from Task where Context == $1 && State > %d order by id();", Resolved))
 	listAllTasks = ql.MustCompile("select id(), Text, State from Task where Context == $1 order by id();")
-	doneTask = ql.MustCompile("update Task set State = $1 where Context == $2 && id() == $3;")
-	addTask = ql.MustCompile("insert into Task values($1, $2, $3, $4, $5, $6);")
+	doneTask     = ql.MustCompile("update Task set State = $1 where Context == $2 && id() == $3;")
+	addTask      = ql.MustCompile("insert into Task values($1, $2, $3, $4, $5, $6);")
 )
 
 func Get(context Context, id int64, must bool) (task Task, err error) {
@@ -31,15 +31,15 @@ func Get(context Context, id int64, must bool) (task Task, err error) {
 	return
 }
 
-func ListTasks(context Context, all bool) (tasks []Task, err error) {
+func List(context Context, all bool) (tasks []Task, err error) {
 	q := listTasks
 	if all {
 		q = listAllTasks
 	}
 	if err = query(nil, q, func(data []interface{}) (bool, error) {
 		task := Task{
-			ID: data[0].(int64),
-			Text: data[1].(string),
+			ID:    data[0].(int64),
+			Text:  data[1].(string),
 			State: unmarshalStateFromInt(data[2].(int32)),
 		}
 		tasks = append(tasks, task)
@@ -68,10 +68,10 @@ func unmarshalStateFromInt(src int32) (state State) {
 
 func Add(context Context, text, body string) (err error) {
 	task := Task{
-		Context: context.ID,
-		Text: text,
-		State: Open,
-		Creation: time.Now(),
+		Context:      context.ID,
+		Text:         text,
+		State:        Open,
+		Creation:     time.Now(),
 		Modification: time.Now(),
 	}
 	ctx, err := beginTransaction()

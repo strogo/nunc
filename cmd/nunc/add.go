@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/imdario/nunc"
 	"io/ioutil"
@@ -37,49 +38,14 @@ func addCli(c *cli.Context) {
 	body := ""
 	text := c.String("text")
 	if text == "" {
-		editor := os.Getenv("EDITOR")
-		if editor == "" {
-			panic("Environment variable 'EDITOR' is not set")
-		}
-		tmp := nunc.ResolvePath("NUNC_EDITMSG")
-		err := ioutil.WriteFile(tmp, []byte(editmsgTemplate), 0600)
+		tmp, err := openEditor()
 		if err != nil {
 			panic(err)
 		}
-		cmd := exec.Command(editor, tmp)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		text, body, err = readTaskFrom(tmp)
 		if err != nil {
 			panic(err)
 		}
-		file, err := os.Open(tmp)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		textCaptured := false
-		lines := []string{}
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			line := strings.TrimSpace(scanner.Text())
-			if strings.HasPrefix(line, "#") {
-				continue
-			}
-			if textCaptured {
-				lines = append(lines, line)
-			} else {
-				if line != "" {
-					text = line
-					textCaptured = true
-				}
-			}
-		}
-		if text == "" {
-			panic("aborting new task due to empty content")
-		}
-		body = strings.Join(lines, "\n")
 	}
 	shortname := getContextFromCli(c)
 	context, _, err := nunc.GetContext(shortname, true)
@@ -89,4 +55,56 @@ func addCli(c *cli.Context) {
 	if err = nunc.Add(context, text, body); err != nil {
 		panic(err)
 	}
+}
+
+func openEditor() (tmp string, err error) {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		panic("Environment variable 'EDITOR' is not set")
+	}
+	tmp = nunc.ResolvePath("NUNC_EDITMSG")
+	err = ioutil.WriteFile(tmp, []byte(editmsgTemplate), 0600)
+	if err != nil {
+		return
+	}
+	cmd := exec.Command(editor, tmp)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		return
+	}
+	return
+}
+
+func readTaskFrom(tmp string) (text, body string, err error) {
+	file, err := os.Open(tmp)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	textCaptured := false
+	lines := []string{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		if textCaptured {
+			lines = append(lines, line)
+		} else {
+			if line != "" {
+				text = line
+				textCaptured = true
+			}
+		}
+	}
+	if text == "" {
+		err = fmt.Errorf("aborting new task due to empty content")
+		return
+	}
+	body = strings.Join(lines, "\n")
+	return
 }

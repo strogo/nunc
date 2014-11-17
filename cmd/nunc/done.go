@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/codegangsta/cli"
 	"github.com/imdario/nunc"
-	"strings"
-	"strconv"
 )
 
 var (
@@ -14,7 +12,7 @@ var (
 		ShortName: "x",
 		Usage:     "mark a task as done",
 		Action:    doneCli,
-		Flags:     []cli.Flag{
+		Flags: []cli.Flag{
 			closed,
 		},
 	}
@@ -28,15 +26,7 @@ func doneCli(c *cli.Context) {
 	initFromCli(c)
 	defer nunc.Destroy()
 	id := c.Args().First()
-	data := strings.SplitN(id, "-", 2)
-	if len(data) != 2 {
-		panic("invalid task id")
-	}
-	context, _, err := nunc.GetContext(data[0], true)
-	if err != nil {
-		panic(err)
-	}
-	taskId, err := strconv.ParseInt(data[1], 0, 64)
+	context, taskId, err := nunc.ResolveTaskID(id)
 	if err != nil {
 		panic(err)
 	}

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/imdario/nunc"
-	"strings"
-	"strconv"
 )
 
 var (
@@ -22,15 +20,7 @@ func getCli(c *cli.Context) {
 	initFromCli(c)
 	defer nunc.Destroy()
 	id := c.Args().First()
-	data := strings.SplitN(id, "-", 2)
-	if len(data) != 2 {
-		panic("invalid task id")
-	}
-	context, _, err := nunc.GetContext(data[0], true)
-	if err != nil {
-		panic(err)
-	}
-	taskId, err := strconv.ParseInt(data[1], 0, 64)
+	context, taskId, err := nunc.ResolveTaskID(id)
 	if err != nil {
 		panic(err)
 	}

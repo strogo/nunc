@@ -2,10 +2,10 @@ package nunc
 
 import (
 	"fmt"
-	"time"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 type State int32
