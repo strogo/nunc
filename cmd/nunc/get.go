@@ -19,8 +19,7 @@ var (
 func getCli(c *cli.Context) {
 	initFromCli(c)
 	defer nunc.Destroy()
-	id := c.Args().First()
-	context, taskId, err := nunc.ResolveTaskID(id)
+	context, taskId, err := getTaskAndContextFromCli(c)
 	if err != nil {
 		panic(err)
 	}

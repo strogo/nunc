@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/imdario/nunc"
-	"os"
 )
 
 var (
@@ -74,14 +73,6 @@ var (
 		Usage: "short name for the context",
 	}
 )
-
-func getContextFromCli(c *cli.Context) (shortname string) {
-	shortname = c.Args().First()
-	if shortname == "" {
-		shortname = os.Getenv("NUNC_MAIN_CONTEXT")
-	}
-	return
-}
 
 func contextListCli(c *cli.Context) {
 	initFromCli(c)
