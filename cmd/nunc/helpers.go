@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 	"os"
 	"strings"

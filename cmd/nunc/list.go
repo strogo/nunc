@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 )
 
@@ -20,8 +20,6 @@ var (
 )
 
 func listCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	shortname := getContextFromCli(c)
 	context, _, err := nunc.GetContext(shortname, true)
 	if err != nil {

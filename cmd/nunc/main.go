@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 	"log"
 	"os"
@@ -30,18 +30,28 @@ func main() {
 		add,
 		del,
 		edit,
-		context,
 		done,
+		fork,
+		context,
 	}
+	app.Before = initFromCli
+	app.After = destroyFromCli
 	app.Flags = []cli.Flag{
 		home,
 	}
 	app.Run(os.Args)
 }
 
-func initFromCli(c *cli.Context) {
+func initFromCli(c *cli.Context) (err error) {
 	home := c.GlobalString("home")
-	if err := nunc.Init(home); err != nil {
-		panic(err)
+	err = nunc.Init(home)
+	if err != nil {
+		return
 	}
+	return
+}
+
+func destroyFromCli(c *cli.Context) (err error) {
+	nunc.Destroy()
+	return
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 )
 
@@ -75,8 +75,6 @@ var (
 )
 
 func contextListCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	beAll := c.Bool("all")
 	contexts, err := nunc.ListContexts(beAll)
 	beVerbose := c.Bool("verbose")
@@ -98,8 +96,6 @@ func contextListCli(c *cli.Context) {
 }
 
 func contextAddCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	shortname := getContextFromCli(c)
 	name := c.String("name")
 	if err := nunc.AddContext(name, shortname); err != nil {
@@ -108,8 +104,6 @@ func contextAddCli(c *cli.Context) {
 }
 
 func contextDeleteCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	shortname := getContextFromCli(c)
 	if err := nunc.DeleteContext(shortname); err != nil {
 		panic(err)
@@ -117,8 +111,6 @@ func contextDeleteCli(c *cli.Context) {
 }
 
 func contextEditCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	oldShortname := getContextFromCli(c)
 	name := c.String("name")
 	shortname := c.String("shortname")
@@ -131,8 +123,6 @@ func contextEditCli(c *cli.Context) {
 }
 
 func contextPurgeCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	shortname := getContextFromCli(c)
 	if err := nunc.PurgeContext(shortname); err != nil {
 		panic(err)

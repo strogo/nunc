@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 )
 
@@ -17,8 +17,9 @@ var (
 )
 
 func getCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
+	// TODO if taskId == "", get oldest
+	// TODO -any (to get the oldest task from any context)
+	// TODO lock context & task
 	context, taskId, err := getTaskAndContextFromCli(c)
 	if err != nil {
 		panic(err)

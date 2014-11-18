@@ -53,6 +53,7 @@ func initDb() (err error) {
 	if err != nil {
 		return
 	}
+	// TODO meta, log
 	return
 }
 
@@ -63,6 +64,9 @@ func initDbTable(ctx *ql.TCtx, specimen interface{}) (err error) {
 }
 
 func Destroy() (err error) {
+	if !is.Initialized {
+		return
+	}
 	err = is.Db.Flush()
 	if err != nil {
 		return

@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 	"io/ioutil"
 	"os"
@@ -33,8 +33,6 @@ const editmsgTemplate = `
 # and an empty message aborts this action.`
 
 func addCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	body := ""
 	text := c.String("text")
 	if text == "" {

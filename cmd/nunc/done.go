@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/codegangsta/cli"
+	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 )
 
@@ -23,8 +23,6 @@ var (
 )
 
 func doneCli(c *cli.Context) {
-	initFromCli(c)
-	defer nunc.Destroy()
 	context, taskId, err := getTaskAndContextFromCli(c)
 	if err != nil {
 		panic(err)
