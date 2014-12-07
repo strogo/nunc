@@ -1,13 +1,13 @@
 nunc
 ====
 
-**No more procastination!**
+**No more procrastination!**
 
-Nunc is a free software cross-platform task management tool designed to handle your tasks and ideas with simplicity and avoiding procastination.
+Nunc is a free software cross-platform task management tool designed to handle your tasks and ideas with simplicity and avoiding procrastination.
 
 Nunc is easy and fast with features like automatic task locking, clipboard integration and full git-like experience.
 
-**What? What does 'nunc' mean?** It is Latin for 'today'. Instead of 'for tomorrow' (that's what procrastinare means), do it now. Whatever it is.
+**What? What does 'nunc' mean?** It is Latin for 'today'. Instead of 'for tomorrow' (that's what procrastinare means), _do it now_. Whatever it is.
 
 ## Status
 
