@@ -1,9 +1,8 @@
 package nunc
 
 type Meta struct {
-	ID    int64  `ql:"index xID"`
 	Key   string `ql:"index xKey"`
-	Value int64
+	Value string
 }
 
 // TODO functions Bool, String, etc.

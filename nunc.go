@@ -53,7 +53,19 @@ func initDb() (err error) {
 	if err != nil {
 		return
 	}
-	// TODO meta, log
+	initDbTable(ctx, (*Lock)(nil))
+	if err != nil {
+		return
+	}
+	initDbTable(ctx, (*Log)(nil))
+	if err != nil {
+		return
+	}
+	initDbTable(ctx, (*ElementID)(nil))
+	if err != nil {
+		return
+	}
+	// TODO meta
 	return
 }
 

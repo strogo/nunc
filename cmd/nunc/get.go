@@ -13,20 +13,55 @@ var (
 		ShortName: "g",
 		Usage:     "get a task from context",
 		Action:    getCli,
+		Flags: []cli.Flag{
+			any,
+			nolock,
+		},
+	}
+	// Add flags
+	any = cli.BoolFlag{
+		Name: "any, a",
+	}
+	nolock = cli.BoolFlag{
+		Name: "nolock, n",
 	}
 )
 
 func getCli(c *cli.Context) {
-	// TODO if taskId == "", get oldest
-	// TODO -any (to get the oldest task from any context)
-	// TODO lock context & task
 	context, taskId, err := getTaskAndContextFromCli(c)
 	if err != nil {
 		panic(err)
 	}
-	task, err := nunc.Get(context, taskId, true)
-	if err != nil {
-		panic(err)
+	var (
+		ok   bool
+		task nunc.Task
+	)
+	lock := !c.Bool("nolock")
+	if lock {
+		task, ok, err = nunc.GetLock(context)
+		if err != nil {
+			panic(err)
+		}
+	}
+	if !ok {
+		if taskId == 0 {
+			if c.Bool("any") {
+				task, context, err = nunc.GetOldestFromAllContexts()
+			} else {
+				task, err = nunc.GetOldest(context)
+			}
+		} else {
+			task, err = nunc.Get(context, taskId, true)
+		}
+		if err != nil {
+			panic(err)
+		}
+		if lock {
+			err = nunc.SetLockIn(context, task)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 	fmt.Printf("[%s]\n\n%s\n\n", nunc.TaskID(context, task), task.Text)
 	body, err := nunc.TaskBody(context, task)

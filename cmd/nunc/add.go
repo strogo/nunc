@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/atotto/clipboard"
 	"github.com/imdario/cli"
 	"github.com/imdario/nunc"
 	"io/ioutil"
@@ -20,11 +21,15 @@ var (
 		Action:    addCli,
 		Flags: []cli.Flag{
 			text,
+			paste,
 		},
 	}
 	// Add flags
 	text = cli.StringFlag{
 		Name: "text, t",
+	}
+	paste = cli.BoolFlag{
+		Name: "clipboard, c",
 	}
 )
 
@@ -33,10 +38,31 @@ const editmsgTemplate = `
 # and an empty message aborts this action.`
 
 func addCli(c *cli.Context) {
-	body := ""
-	text := c.String("text")
+	shortname := getContextFromCli(c)
+	context, _, err := nunc.GetContext(shortname, true)
+	if err != nil {
+		panic(err)
+	}
+	body, text := getTextAndBodyFromContext(c)
+	task, err := nunc.Add(context, text, body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("New task:", nunc.TaskID(context, task))
+}
+
+func getTextAndBodyFromContext(c *cli.Context) (body, text string) {
+	text = c.String("text")
 	if text == "" {
-		tmp, err := openEditor()
+		var (
+			tmp string
+			err error
+		)
+		if c.Bool("clipboard") {
+			tmp, err = openClipboard()
+		} else {
+			tmp, err = openEditor()
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -45,14 +71,42 @@ func addCli(c *cli.Context) {
 			panic(err)
 		}
 	}
-	shortname := getContextFromCli(c)
-	context, _, err := nunc.GetContext(shortname, true)
+	return
+}
+
+func openClipboard() (tmp string, err error) {
+	tmp = nunc.ResolvePath("NUNC_EDITMSG")
+	text, err := clipboard.ReadAll()
 	if err != nil {
-		panic(err)
+		return
 	}
-	if err = nunc.Add(context, text, body); err != nil {
-		panic(err)
+	text = strings.TrimSpace(text)
+	if text == "" {
+		err = fmt.Errorf("aborting new task due to empty content")
+		return
 	}
+	fmt.Println("Do you want to add this as task? (y/N)")
+	elipsis := ""
+	length := len(text)
+	if length > 140 {
+		length = 140
+		elipsis = "..."
+	}
+	fmt.Printf("\n%s%s\n\n> ", text[:length], elipsis)
+	reader := bufio.NewReader(os.Stdin)
+	input, _, _ := reader.ReadRune()
+	switch input {
+	case 'y', 'Y':
+		// noop
+	default:
+		err = fmt.Errorf("aborting new task due to user input")
+		return
+	}
+	err = ioutil.WriteFile(tmp, []byte(text), 0600)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func openEditor() (tmp string, err error) {
@@ -91,6 +145,11 @@ func readTaskFrom(tmp string) (text, body string, err error) {
 			continue
 		}
 		if textCaptured {
+			if len(lines) == 0 {
+				if line == "" {
+					continue
+				}
+			}
 			lines = append(lines, line)
 		} else {
 			if line != "" {

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	getContext           = ql.MustCompile("select * from Context where ShortName == $1;")
+	getContext           = ql.MustCompile("select id(), Name, ShortName, Inactive from Context where ShortName == $1;")
 	listContexts         = ql.MustCompile("select * from Context where Inactive == FALSE;")
 	listAllContexts      = ql.MustCompile("select * from Context;")
 	addContext           = ql.MustCompile("insert into Context values($1, $2, $3);")
@@ -18,12 +18,15 @@ var (
 	editContextShortName = ql.MustCompile("update Context set ShortName = $1 where ShortName == $2;")
 	purgeContextTasks    = ql.MustCompile("delete from Task where Context == $1;")
 	purgeContext         = ql.MustCompile("delete from Context where ShortName == $1;")
+	getContextById       = ql.MustCompile("select * from Context where id() == $1;")
 )
 
-func sanitizeContext(shortname string) (clean string, err error) {
+func sanitizeContext(shortname string, must bool) (clean string, err error) {
 	clean = strings.TrimSpace(shortname)
 	if clean == "" {
-		err = errors.New("context not provided")
+		if must {
+			err = errors.New("context not provided")
+		}
 		return
 	}
 	if !strings.HasPrefix(clean, "@") {
@@ -39,8 +42,8 @@ func sanitizeContext(shortname string) (clean string, err error) {
 }
 
 func GetContext(shortname string, must bool) (context Context, id string, err error) {
-	id, err = sanitizeContext(shortname)
-	if err != nil {
+	id, err = sanitizeContext(shortname, must)
+	if err != nil || (id == "" && must) {
 		return
 	}
 	if err = query(nil, getContext, func(data []interface{}) (bool, error) {
@@ -53,6 +56,7 @@ func GetContext(shortname string, must bool) (context Context, id string, err er
 	}
 	if (context == Context{}) && must {
 		err = fmt.Errorf("unknown context '@%s'", id)
+		return
 	}
 	return
 }
@@ -197,6 +201,22 @@ func PurgeContext(shortname string) (err error) {
 		return
 	}
 	if err = os.RemoveAll(ResolvePath(id)); err != nil {
+		return
+	}
+	return
+}
+
+func GetContextById(id int64, must bool) (context Context, err error) {
+	if err = query(nil, getContextById, func(data []interface{}) (bool, error) {
+		if er2 := ql.Unmarshal(&context, data); er2 != nil {
+			return false, er2
+		}
+		return true, nil
+	}, id); err != nil {
+		return
+	}
+	if (context == Context{}) && must {
+		err = fmt.Errorf("unknown context '@%s'", id)
 		return
 	}
 	return

@@ -15,5 +15,8 @@ var (
 )
 
 func editCli(c *cli.Context) {
-
+	//	context, taskId, err := getTaskAndContextFromCli(c)
+	//	if err != nil {
+	//		panic(err)
+	//	}
 }

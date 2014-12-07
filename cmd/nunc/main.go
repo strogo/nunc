@@ -52,6 +52,8 @@ func initFromCli(c *cli.Context) (err error) {
 }
 
 func destroyFromCli(c *cli.Context) (err error) {
+	args := c.Args()
+	nunc.Trace(args[0], args[1:])
 	nunc.Destroy()
 	return
 }

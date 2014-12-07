@@ -127,4 +127,9 @@ func contextPurgeCli(c *cli.Context) {
 	if err := nunc.PurgeContext(shortname); err != nil {
 		panic(err)
 	}
+	// TODO This should be inside PurgeContext but
+	// I need to check how to detect active transactions.
+	if err := nunc.DeleteEID(shortname[1:]); err != nil {
+		panic(err)
+	}
 }

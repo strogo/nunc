@@ -31,4 +31,12 @@ func doneCli(c *cli.Context) {
 	if err := nunc.Done(context, taskId, beClose); err != nil {
 		panic(err)
 	}
+	task, err := nunc.Get(context, taskId, true)
+	if err != nil {
+		panic(err)
+	}
+	err = nunc.SetLockOut(context, task)
+	if err != nil {
+		panic(err)
+	}
 }

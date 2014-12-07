@@ -19,7 +19,7 @@ const (
 )
 
 type Task struct {
-	ID           int64 `ql:"index xID"`
+	EID          int64 `ql:"index xEID"`
 	Context      int64
 	Text         string
 	State        State
@@ -47,11 +47,11 @@ func (t *Task) StateString() (state string) {
 }
 
 func TaskID(context Context, task Task) string {
-	return fmt.Sprintf("@%s-%d", context.ShortName, task.ID)
+	return fmt.Sprintf("@%s-%d", context.ShortName, task.EID)
 }
 
 func TaskPath(context Context, task Task) string {
-	return filepath.Join(context.ShortName, strconv.FormatInt(task.ID, 10))
+	return filepath.Join(context.ShortName, strconv.FormatInt(task.EID, 10))
 }
 
 func TaskBody(context Context, task Task) (string, error) {
